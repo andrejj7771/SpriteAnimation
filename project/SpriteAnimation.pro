@@ -1,7 +1,9 @@
 QT += gui widgets
 
-CONFIG += c++11 console
-CONFIG -= app_bundle
+CONFIG += c++11 app_bundle
+
+TARGET = SpriteAnimation
+TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
