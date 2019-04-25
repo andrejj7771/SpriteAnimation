@@ -7,7 +7,7 @@
 class QString;
 
 namespace Viewport {
-	class Scene;
+	class AnimationScene;
 }
 
 
@@ -23,7 +23,7 @@ namespace Animation {
 		std::vector<Animation*> m_animations;
 		Animation * m_currentAnimation;
 		
-		Viewport::Scene * m_scene;
+		Viewport::AnimationScene * m_scene;
 		
 	public:
 		
@@ -42,7 +42,7 @@ namespace Animation {
 		inline Animation * getCurrentAnimation() const;
 		inline size_t getNumAnimations() const;
 		
-		inline Viewport::Scene * getScene() const;
+		inline Viewport::AnimationScene * getScene() const;
 		
 	private:
 		
@@ -67,7 +67,7 @@ namespace Animation {
 		return m_animations.size();
 	}
 	
-	inline Viewport::Scene * AnimationController::getScene() const {
+	inline Viewport::AnimationScene * AnimationController::getScene() const {
 		return m_scene;
 	}
 	

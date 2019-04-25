@@ -1,14 +1,11 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include <QGraphicsView>
-#include <QPixmap>
-#include <QColor>
-#include <QSize>
-#include <QTimer>
+#include <QGraphicsRectItem>
 
-#include <functional>
 #include <vector>
+
+#include "Scene/Viewport.h"
 
 class QGraphicsScene;
 class QGraphicsPixmapItem;
@@ -19,23 +16,18 @@ class QPoint;
 
 namespace Viewport {
 	
-	class Scene : public QGraphicsView {
+	namespace Object {
+		class ViewportItem;
+	}
+	
+	class Scene : public Viewport {
 		
 		Q_OBJECT
 		
-		QSize m_size;
-		QGraphicsScene * m_scene;
-		QGraphicsPixmapItem * m_mainItem;
-		
-		std::vector<QGraphicsItem*> m_items;
-		
-		QColor m_backgroundColor;
-		QPixmap m_backgroundImage;
+		std::vector<Object::ViewportItem*> m_items;
 		
 		bool m_mouseGrabbingSupport;
 		bool m_keyGrabbingSupport;
-		
-		QTimer m_updateTimer;
 		
 	public:
 		
@@ -43,20 +35,15 @@ namespace Viewport {
 		Scene(const QSize & size);
 		~Scene() override;
 		
-		bool appendItem(QGraphicsItem * item);
-		
-		bool removeItem(QGraphicsItem * item);
+		bool appendItem(Object::ViewportItem * item);
+		bool removeItem(Object::ViewportItem * item);
 		bool removeItem(size_t index);
 		
-		bool containsItem(QGraphicsItem * item) const;
+		inline bool containsItem(Object::ViewportItem * item) const;
 		
-		inline QGraphicsItem * getItem(size_t index) const;
+		inline Object::ViewportItem * getItem(size_t index) const;
 		
 		inline size_t getNumItems() const;
-		
-		void setSize(const QSize & size);
-		void setWidth(int width);
-		void setHeight(int height);
 		
 		inline void setMouseGrabbingSupport(bool support);
 		inline bool isMouseGrabbingSupport() const;
@@ -64,25 +51,8 @@ namespace Viewport {
 		inline void setKeyGrabbingSupport(bool support);
 		inline bool isKeyGrabbingSupport() const;
 		
-		inline const QSize & getSize() const;
-		inline int getWidth() const;
-		inline int getHeight() const;
-		
-		void setBackgroungColor(const QColor & color);
-		inline const QColor & getBackgroundColor() const;
-		
-		void setBackgroundImage(const QPixmap & image, bool repeat = false);
-		void setBackgroundImage(const QString & path, bool repeat = false);
-		inline const QPixmap & getBackgroundImage() const;
-		
-		void setWorkImage(const QPixmap & image);
-		void setWorkImage(const QString & path);
-		QPixmap getWorkImage() const;
-		
-		void setRepeatBackground(bool value = true) {
-			value ? setCacheMode(QGraphicsView::CacheBackground) :
-					setCacheMode(QGraphicsView::CacheNone);
-		}
+		void setWorkImage(const QPixmap & image) override;
+		void setWorkImage(const QString & path) override;
 		
 	private:
 		
@@ -96,14 +66,11 @@ namespace Viewport {
 		
 		void wheelEvent(QWheelEvent * event) override;
 		
-		void update();
+		void update() override;
 		
 	signals:
 		
-		void onChangeSize(const QSize & size);
-		void onChangeWorkImage(QPixmap image);
-		
-		void onAppendItem(QGraphicsItem * item);
+		void onAppendItem(Object::ViewportItem * item);
 		
 		void onDoubleClick(const QPoint & pos, Qt::MouseButton button);
 		void onMouseDown(const QPoint & pos, Qt::MouseButton button);
@@ -115,7 +82,11 @@ namespace Viewport {
 		
 	};
 	
-	inline QGraphicsItem * Scene::getItem(size_t index) const {
+	inline bool Scene::containsItem(Object::ViewportItem * item) const {
+		return std::find(m_items.begin(), m_items.end(), item) != m_items.end();
+	}
+	
+	inline Object::ViewportItem * Scene::getItem(size_t index) const {
 		return index >= m_items.size() ? nullptr : m_items.at(index);
 	}
 	
@@ -137,26 +108,6 @@ namespace Viewport {
 	
 	inline bool Scene::isKeyGrabbingSupport() const {
 		return m_keyGrabbingSupport;
-	}
-	
-	inline const QSize & Scene::getSize() const {
-		return m_size;
-	}
-	
-	inline int Scene::getWidth() const {
-		return m_size.width();
-	}
-	
-	inline int Scene::getHeight() const {
-		return m_size.height();
-	}
-	
-	inline const QColor & Scene::getBackgroundColor() const {
-		return m_backgroundColor;
-	}
-	
-	inline const QPixmap & Scene::getBackgroundImage() const {
-		return m_backgroundImage;
 	}
 	
 }

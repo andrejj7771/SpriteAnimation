@@ -6,58 +6,42 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 
+#include "../items.h"
+
 namespace Viewport {
-	
-	Scene::Scene(int width, int height) {
-		m_scene = new QGraphicsScene(nullptr);
-		setScene(m_scene);
-		m_size.setWidth(width);
-		m_size.setHeight(height);
-		
+
+	Scene::Scene(int width, int height) : Viewport (width, height) {
 		m_mouseGrabbingSupport = true;
 		m_keyGrabbingSupport = true;
-		
-		m_updateTimer.start(1000 / 60);
-		connect(&m_updateTimer, &QTimer::timeout, this, &Scene::update);
-		
-		m_mainItem = new QGraphicsPixmapItem();
-		m_scene->addItem(m_mainItem);
 	}
 	
-	Scene::Scene(const QSize & size) {
-		m_scene = new QGraphicsScene(nullptr);
-		setScene(m_scene);
-		m_size = size;
-		
-		m_updateTimer.start(1000 / 60);
-		connect(&m_updateTimer, &QTimer::timeout, this, &Scene::update);
-		
-		m_mainItem = new QGraphicsPixmapItem();
-		m_scene->addItem(m_mainItem);
+	Scene::Scene(const QSize & size) : Viewport (size) {
+		m_mouseGrabbingSupport = true;
+		m_keyGrabbingSupport = true;
 	}
 	
 	Scene::~Scene() {
 		for (auto item : m_items)
 			delete item;
-		m_items.clear();
-		
-		delete m_scene;
 	}
 	
-	bool Scene::appendItem(QGraphicsItem * item) {
+	bool Scene::appendItem(Object::ViewportItem * item) {
 		if (std::find(m_items.begin(), m_items.end(), item) != m_items.end())
 			return false;
 		
+		m_items.push_back(item);
 		m_scene->addItem(item);
+		item->setScene(this);
 		emit onAppendItem(item);
 		return true;
 	}
 	
-	bool Scene::removeItem(QGraphicsItem * item) {
+	bool Scene::removeItem(Object::ViewportItem * item) {
 		auto itemIterator = std::find(m_items.begin(), m_items.end(), item);
 		if (itemIterator == m_items.end())
 			return false;
 		
+		item->setScene(nullptr);
 		m_scene->removeItem(item);
 		m_items.erase(itemIterator);
 		return true;
@@ -67,93 +51,25 @@ namespace Viewport {
 		if (index >= m_items.size())
 			return false;
 		
-		QGraphicsItem * item = m_items.at(index);
+		Object::ViewportItem * item = m_items.at(index);
 		if (!item)
 			return false;
 		
+		item->setScene(nullptr);
 		m_scene->removeItem(item);
 		m_items.erase(m_items.begin() + int(index));
 		return true;
 	}
 	
-	bool Scene::containsItem(QGraphicsItem * item) const {
-		return std::find(m_items.begin(), m_items.end(), item) != m_items.end();
-	}
-	
-	void Scene::setSize(const QSize & size) {
-		if (m_size == size)
-			return;
-		
-		m_size = size;
-		emit onChangeSize(size);
-	}
-	
-	void Scene::setWidth(int width) {
-		if (m_size.width() == width)
-			return;
-		
-		m_size.setWidth(width);
-		emit onChangeSize(m_size);
-	}
-	
-	void Scene::setHeight(int height) {
-		if (m_size.height() == height)
-			return;
-		
-		m_size.setHeight(height);
-		emit onChangeSize(m_size);
-	}
-	
-	void Scene::setBackgroungColor(const QColor & color) {
-		m_backgroundColor = color;
-		setBackgroundBrush(QBrush(color));
-	}
-	
-	void Scene::setBackgroundImage(const QPixmap & image, bool repeat) {
-		m_backgroundImage = image;
-		setBackgroundBrush(QBrush(image));
-		repeat ? setCacheMode(QGraphicsView::CacheBackground) : 
-				 setCacheMode(QGraphicsView::CacheNone);
-	}
-	
-	void Scene::setBackgroundImage(const QString & imagePath, bool repeat) {
-		QPixmap image;
-		if (!image.load(imagePath)) {
-			printf("E: %s -> Can't load image\n", __FUNCTION__);
-			return;
-		}
-		
-		m_backgroundImage = image;
-		setBackgroundBrush(QBrush(image));
-		repeat ? setCacheMode(QGraphicsView::CacheBackground) : 
-				 setCacheMode(QGraphicsView::CacheNone);
-	}
-	
 	void Scene::setWorkImage(const QPixmap & image) {
-		if (getWorkImage().toImage() == image.toImage())
-			return;
-		
-		m_mainItem->setPixmap(image);
-		m_mainItem->setPos(0, -image.height());
-		
-		emit onChangeWorkImage(image);
+		Viewport::setWorkImage(image);
+		setSceneRect(0, 0, image.width(), image.height());
 	}
 	
 	void Scene::setWorkImage(const QString & path) {
-		QPixmap image;
-		if (!image.load(path)) {
-			printf("E: %s -> Can't load image\n", __FUNCTION__);
-			return;
-		}
-		
-		m_mainItem->setPixmap(image);
-		m_mainItem->setPos(0, -image.height());
-		
-		emit onChangeWorkImage(image);
-	}
-	
-	QPixmap Scene::getWorkImage() const {
-		return m_mainItem->pixmap();
+		Viewport::setWorkImage(path);
+		const QPixmap & image = getWorkImage();
+		setSceneRect(0, 0, image.width(), image.height());
 	}
 	
 	void Scene::mousePressEvent(QMouseEvent * event) {
@@ -187,7 +103,7 @@ namespace Viewport {
 	void Scene::keyPressEvent(QKeyEvent * event) {
 		if (!m_keyGrabbingSupport)
 			return;
-		
+			
 		emit onKeyDown(static_cast<Qt::Key>(event->key()));
 	}
 	
@@ -210,8 +126,8 @@ namespace Viewport {
 	}
 	
 	void Scene::update() {
-		m_mainItem->update();
-		for (const auto & item : m_items)
+		Viewport::update();
+		for (Object::ViewportItem * item : m_items)
 			item->update();
 	}
 	

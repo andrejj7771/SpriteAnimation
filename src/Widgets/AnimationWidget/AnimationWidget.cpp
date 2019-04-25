@@ -4,7 +4,7 @@
 #include "Animation/AnimationController.h"
 #include "Animation/Animation.h"
 
-#include "Scene/Scene.h"
+#include "Scene/AnimationScene.h"
 
 #include <QComboBox>
 

@@ -1,6 +1,6 @@
 QT += gui widgets
 
-CONFIG += c++11 app_bundle
+CONFIG += c++17 app_bundle
 
 TARGET = SpriteAnimation
 TEMPLATE = app
@@ -26,7 +26,9 @@ SOURCES += $$PWD/../src/Animation/Frame.cpp
 SOURCES += $$PWD/../src/Animation/Animation.cpp
 SOURCES += $$PWD/../src/Animation/AnimationController.cpp
 
+SOURCES += $$PWD/../src/Scene/Viewport.cpp
 SOURCES += $$PWD/../src/Scene/Scene.cpp
+SOURCES += $$PWD/../src/Scene/AnimationScene.cpp
 
 SOURCES += $$PWD/../src/Widgets/AnimationWidget/AnimationWidget.cpp
 
@@ -35,6 +37,8 @@ HEADERS += $$PWD/../include/Animation/Animation.h
 HEADERS += $$PWD/../include/Animation/AnimationController.h
 
 HEADERS += $$PWD/../include/Scene/Scene.h
+HEADERS += $$PWD/../include/Scene/Viewport.h
+HEADERS += $$PWD/../include/Scene/AnimationScene.h
 
 HEADERS += $$PWD/../include/Widgets/AnimationWidget/AnimationWidget.h
 

@@ -2,16 +2,19 @@
 #include "Animation/Animation.h"
 #include "Animation/Frame.h"
 
-#include "Scene/Scene.h"
+#include "Scene/AnimationScene.h"
 
 namespace Animation {
 	
 	AnimationController::AnimationController() {
 		m_currentAnimation = nullptr;
 		
-		m_scene = new Viewport::Scene(250, 250);
-		m_scene->setMouseGrabbingSupport(false);
-		m_scene->setKeyGrabbingSupport(false);
+		try {
+			m_scene = new Viewport::AnimationScene(250, 250);
+		} catch (const std::bad_alloc & error) {
+			throw(error);
+		}
+		
 		m_scene->setBackgroundImage(":/resources/checker.png", true);
 		m_scene->show();
 	}
