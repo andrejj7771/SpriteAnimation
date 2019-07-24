@@ -17,7 +17,7 @@ namespace UI {
 		ui->setupUi(this);
 		
 		if (!controller) {
-			printf_s("E:%s -> AnimationContoller is nullptr. Abort.\n", __FUNCTION__);
+			printf("E:%s -> AnimationContoller is nullptr. Abort.\n", __FUNCTION__);
 			abort();
 		}
 		
